@@ -1,0 +1,43 @@
+IOPub data rate exceeded.
+The notebook server will temporarily stop sending output
+to the client in order to avoid crashing it.
+To change this limit, set the config variable
+`--NotebookApp.iopub_data_rate_limit`.
+
+Current values:
+NotebookApp.iopub_data_rate_limit=1000000.0 (bytes/sec)
+NotebookApp.rate_limit_window=3.0 (secs)
+
+
+You have to increase the number of partitions to improve parallelism
+https://docs.databricks.com/data/data-sources/sql-databases.html#jdbc-reads
+
+
+Manage parallelism
+In the Spark UI, you can see that the number of partitions dictate the number of tasks that are launched. Each task is spread across the executors, which can increase the parallelism of the reads and writes through the JDBC interface. See the Spark SQL programming guide for other parameters, such as fetchsize, that can help with performance.
+
+You can use two DataFrameReader APIs to specify partitioning:
+
+jdbc(url:String,table:String,columnName:String,lowerBound:Long,upperBound:Long,numPartitions:Int,...) takes the name of a numeric column (columnName), two range endpoints (lowerBound, upperBound) and a target numPartitions and generates Spark tasks by evenly splitting the specified range into numPartitions tasks. This work well if your database table has an indexed numeric column with fairly evenly-distributed values, such as an auto-incrementing primary key; it works somewhat less well if the numeric column is extremely skewed, leading to imbalanced tasks.
+jdbc(url:String,table:String,predicates:Array[String],...) accepts an array of WHERE conditions that can be used to define custom partitions: this is useful for partitioning on non-numeric columns or for dealing with skew. When defining custom partitions, remember to consider NULL when the partition columns are Nullable. Don’t manually define partitions using more than two columns since writing the boundary predicates require much more complex logic.
+
+
+https://sparkbyexamples.com/spark/spark-dataframe-cache-and-persist-explained/
+
+https://developer.ibm.com/blogs/spark-performance-optimization-guidelines/
+
+spark.sql.broadcastTimeohttps://www.slideshare.net/jcmia1/apache-spark-20-tuning-guide
+
+
+To look into
+https://www.linkedin.com/pulse/tune-spark-jobs-2-chaaranpall-lambba
+https://databricks.com/blog/2015/05/28/tuning-java-garbage-collection-for-spark-applications.html
+https://developer.ibm.com/blogs/spark-performance-optimization-guidelines/
+
+*****
+https://spark.apache.org/docs/latest/tuning.html
+
+
+
+****
+Time function
